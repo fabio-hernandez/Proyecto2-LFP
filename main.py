@@ -1,8 +1,7 @@
-import time
 from Analizador import *
+import time
 
-listaglc = ListaGramatica()
-
+listaglc = ListGram()
 
 def menu():
     print('\n')
@@ -14,7 +13,7 @@ def menu():
           "4. Reporte recorrido\n"
           "5. Reporte en tabla\n"
           "6. Salir\n")
-    valor = input(">>Por favor seleccione una opción: ")
+    valor = input(">>>Por favor seleccione una opción: ")
     return valor
 
 
@@ -44,13 +43,26 @@ while bandera:
         print('*Ruta: ' + fichero + '*')
         listaglc.CargarGramaticas(fichero)
     elif opcion == 2:
-        print('no efe')
+        listaglc.MostrarGramaticas()
+        eleccion = input('>>>Por favor ingrese el nombre de la gramatica que desea visualizar:')
+        automata = listaglc.DevolverAutomata(eleccion)
+        try:
+            listaglc.ImprimirAutomata(automata)
+            input('>>>Presione Enter para continuar')
+            os.system('cls')
+        except:
+            print('No eligio un automata correcto')
     elif opcion == 3:
-        print('hola')
+        print('Listando gramaticas disponibles: ')
+        listaglc.MostrarGramaticas()
+        eleccion = input('>>>Ingrese el nombre de la gramatica de la que desea el AP: ')
+        input('>>>Presione Enter para continuar')
+        automata = listaglc.DevolverAutomata(eleccion)
+        automata.AutomataEquivalente()
     elif opcion == 4:
-        print("Listando todas")
+        print("Arriba la esperanza abuelita")
     elif opcion == 5:
-        print("Archivo HTML")
+        print("Sale lol? xd")
     elif opcion == 6:
         bandera = False
     else:

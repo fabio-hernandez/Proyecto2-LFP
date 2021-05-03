@@ -24,25 +24,25 @@ class Gramatica(object):
                 return True
         return False
 
-    def ExisteNoTermianal(self, nombre):
+    def ExisteNoTerminal(self, nombre):
         for estado in self.noterminales:
             if estado.estado == nombre:
                 return True
         return False
 
     def IngresarAlfabeto(self, parteAlfabeto):
-        if self.ExisteNoTermianal(parteAlfabeto):
-            print('Este caracter se esta usando como un No Terminal...')
+        if self.ExisteNoTerminal(parteAlfabeto):
+            print('Este caracter esta siendo usado como un No Terminal')
             print('')
         elif self.ExisteEnTerminales(parteAlfabeto):
-            print(parteAlfabeto, 'ya es parte de los terminales...')
+            print(parteAlfabeto, 'Este caracter esta siendo usado como un Terminal')
             print('')
         else:
             self.terminales.append(parteAlfabeto)
 
     def AgregarEstados(self, nombre):
-        if self.ExisteNoTermianal(nombre):
-            print('Ya existe un estado con el simbolo', nombre)
+        if self.ExisteNoTerminal(nombre):
+            print('Ya existe un estado con este simbolo', nombre)
             print('')
         else:
             self.noterminales.append(NoTerminal(nombre))
@@ -50,41 +50,41 @@ class Gramatica(object):
             print('')
 
     def AgregarTransicion(self, linea):
-        separado = linea.split('->')
-        produccion = separado[1].split(' ')
+        separador = linea.split('->')
+        produccion = separador[1].split(' ')
 
-        if self.ExisteNoTermianal(separado[0]):
+        if self.ExisteNoTerminal(separador[0]):
 
-            for analizada in produccion:
+            for analizador in produccion:
 
-                if self.ExisteNoTermianal(analizada) or self.ExisteEnTerminales(analizada):
+                if self.ExisteNoTerminal(analizador) or self.ExisteEnTerminales(analizador):
                     '''Seguimos'''
                 else:
-                    print('La transicion no se ingreso de forma correcta')
+                    print('La transicion se ingreso de manera incorrecta')
                     return False
-            print('Transicion ingresada correctamente')
+            print('La transicion fue ingresada correctamente')
         else:
-            print('La transicion no se ingreso de forma correcta')
+            print('La transicion se ingreso de manera incorrecta')
             return False
         if len(produccion) == 2:
-            if self.ExisteEnTerminales(produccion[0]) and self.ExisteNoTermianal(produccion[1]):
-                '''No se hace nada'''
+            if self.ExisteEnTerminales(produccion[0]) and self.ExisteNoTerminal(produccion[1]):
+                '''Nada'''
             else:
                 self.EsLibreDeContexto = True
         elif len(produccion) == 1 and self.ExisteEnTerminales(produccion[0]):
-            '''No se hace nada'''
+            '''Nada'''
         else:
             self.EsLibreDeContexto = True
 
         for noterminal in self.noterminales:
-            if noterminal.estado == separado[0]:
-                noterminal.transiciones.append(separado[1])
-                print('Transicion agregada')
+            if noterminal.estado == separador[0]:
+                noterminal.transiciones.append(separador[1])
+                print('Transicion agregada exitosamente')
 
     def AutomataEquivalente(self):
         alfabeto = self.cadenaterminales
         simbolospila = self.cadenaterminales + ',' + self.cadenanotermianles + ',#'
-        file = open('Carga/automataPila.dot', "w")
+        file = open('automataPila.dot', "w")
         file.write("digraph grafica{" + os.linesep)
         file.write("rankdir=LR;" + os.linesep)
         file.write("rank=same;" + os.linesep)
@@ -95,9 +95,9 @@ class Gramatica(object):
         file.write('i -> p [label = "$,$;#"]' + os.linesep)
         file.write('p -> q [label = "$,$;' + self.inicial + '"]' + os.linesep)
         file.write('q -> f [label = "$,#;$"]' + os.linesep)
-        for est in self.noterminales:
-            for trans in est.transiciones:
-                transicion = '"$,' + est.estado + ';' + trans.replace(' ', '') + '"'
+        for estado in self.noterminales:
+            for transi in estado.transiciones:
+                transicion = '"$,' + estado.estado + ';' + transi.replace(' ', '') + '"'
                 file.write(transicion + ' [shape=none];')
                 file.write('q -> ' + transicion + ' [dir = none]' + os.linesep)
                 file.write(transicion + '-> q' + os.linesep)
@@ -118,12 +118,29 @@ class Gramatica(object):
         file.write('>];')
 
         file.write(os.linesep)
-        file.write('Titulo [shape=plaintext,fontsize=20, label="Nombre: ' + self.nombre + '"]')
-
+        file.write('Titulo [shape=plaintext,fontsize=20, label="Nombre: Automata de Pila: ' + self.nombre + '"]')
         file.write('}')
         file.close()
-        subprocess.call('dot -Tpdf Carga/automataPila.dot -o automataPila.pdf')
-        os.system('automataPila.pdf')
+        subprocess.call('dot -Tpdf automataPila.dot -o automataPila.pdf')
+        os.system("dot -Tpng -o graph-g.png automataPila.dot")
+        os.system('AP.html')
+        fileAP = open('automata.ap', "w")
+        fileAP.write(str(self.nombre) + '\n')
+        fileAP.write(alfabeto + '\n')
+        fileAP.write(alfabeto + ',#' + '\n')
+        fileAP.write('I,P,Q,F' + '\n')
+        fileAP.write('I' + '\n')
+        fileAP.write('F' + '\n')
+        fileAP.write('P,$,$;Q,#' + '\n')
+        fileAP.write('I,' + self.inicial + ',$;P,' + self.inicial + '\n')
+        for estado in self.noterminales:
+            for transi in estado.transiciones:
+                transicion = '$,' + estado.estado + ';' + transi.replace(' ', '')
+                fileAP.write(
+                    'P,' + transicion[0] + transicion[1] + transicion[2] + transicion[3] + 'Q,' + transicion[4] + '\n')
+
+        fileAP.write('Q,$,#;F,$' + '\n')
+        fileAP.write('*')
 
 
 class transiciones(object):
@@ -140,7 +157,7 @@ class transiciones(object):
         return self.simboloInserta
 
     def ImprimirTransicion(self):
-        trans = ','+self.simboloLee + ',' + self.simboloExtrae + ';' + self.destino + ',' + self.simboloInserta
+        trans = ',' + self.simboloLee + ',' + self.simboloExtrae + ';' + self.destino + ',' + self.simboloInserta
         return trans
 
 
@@ -156,3 +173,150 @@ class NoTerminal(object):
         if self.consulta > (len(self.transiciones) - 1):
             self.consulta = 0
         return self.transiciones[consultaActual]
+
+
+class ListaGramatica(object):
+        def __init__(self):
+            self.gramatica = []
+            self.error = []
+
+        def ExisteGramatica(self, AFD):
+            for afd in self.gramatica:
+                if afd.nombre == AFD:
+                    print('Existe una gramatica con ese nombre')
+                    return True
+            return False
+
+        def EstaVacio(self):
+            if len(self.gramatica) == 0:
+                return True
+            else:
+                return False
+
+        def EliminarAFD(self, nombre):
+            for afd in self.gramatica:
+                if afd.nombre == nombre:
+                    self.gramatica.remove(afd)
+                    print('Gramatica eliminada')
+
+        def Agregar(self, AFD):
+            if not self.ExisteGramatica(AFD.nombre):
+                self.gramatica.append(AFD)
+            else:
+                '''Ya se manda mensaje desde el otro metodo'''
+
+        def MostrarGramaticas(self):
+            for afd in self.gramatica:
+                print(afd.nombre)
+
+        def CargarGramaticas(self, ruta):
+            global EnCreacion
+            automatas = open(ruta, 'r')
+            noL = 0  # Numero de linea
+            for linea in automatas.readlines():
+                noL += 1
+                linea = linea.replace('\n', '')
+
+                if noL == 1:  # Ingresando titulo al automata
+                    if not self.ExisteGramatica(linea):
+                        EnCreacion = Gramatica(linea)
+                        print(EnCreacion.nombre, 'creandose')
+                    else:
+                        self.EliminarAFD(linea)
+                        EnCreacion = Gramatica(linea)
+                        print(EnCreacion.nombre, 'creandose')
+                elif noL == 2:  # Ingresando alfabeto del automata
+                    contador = 0
+                    for d in linea.split(';'):
+                        print(d)
+                        if contador == 0:
+                            for alfa in d.split(','):
+                                EnCreacion.AgregarEstados(alfa)
+                                EnCreacion.cadenanotermianles = d
+                        elif contador == 1:
+                            for alfa in d.split(','):
+                                EnCreacion.IngresarAlfabeto(alfa)
+                            EnCreacion.cadenaterminales = d
+                        elif contador == 2:
+                            EnCreacion.inicial = d
+                        contador += 1
+                elif linea == '*':
+                    print(' ')
+                    if EnCreacion.EsLibreDeContexto:
+                        self.gramatica.append(EnCreacion)
+                        print('Automata agregado correctamente')
+                        self.ImprimirAutomata(EnCreacion)
+
+                    else:
+                        print('No es una gramatica libre del contexto, no sera agregada')
+                        self.error.append(['Nombre de la gramatica:  ' + str(EnCreacion.nombre),
+                                           'error, no se cargo no es una gramatica de tipo 2 o Libre del contexto'])
+                        ListaGramatica.reporteError(self)
+                    noL = 0
+                else:
+                    EnCreacion.AgregarTransicion(linea)
+            automatas.close()
+
+        def ImprimirAutomata(self, EnCreacion):
+
+            print('Nombre:', EnCreacion.nombre)
+            print('No terminales:', EnCreacion.cadenanotermianles)
+            print('Terminales: ', EnCreacion.cadenaterminales)
+            print('No terminal inicial:', EnCreacion.inicial)
+            print('Producciones:')
+            n = 0
+            for estado in EnCreacion.noterminales:
+                n += 1
+                no = 1
+                for transicion in estado.transiciones:
+                    if no == 1:
+                        print("producion " + str(n) + ': ' + estado.estado, '->', transicion)
+                    else:
+                        print("\t" + "\t" + "\t" + "\t" + '|', transicion)
+                    no += 1
+
+        def DevolverADP(self, nombre):
+            for adp in self.gramatica:
+                if adp.nombre == nombre:
+                    return adp
+            return False
+
+        def reporteError(self):
+            contenido = ''
+            htmFile = open("Reporte_Gramaticas" + ".html", "w", encoding='utf8')
+            htmFile.write("""<!DOCTYPE HTML PUBLIC"
+                       <html>
+                       <head>
+                           <title>Reporte de errores</title>
+                        <meta charset="utf-8">
+                     <meta name="viewport" content="width=device-width, initial-scale=1">
+                     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+                     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>    
+                       </head>
+                       <body>
+                       <div class="container">
+                     <h2>Reporte de errores</h2>
+                     <p>Lista de errores</p>            
+                     <table class="table">
+                       <thead>
+                         <tr>
+                          <th>nombre</th>
+                           <th>razon</th>
+
+                         </tr>
+                       </thead>
+                       """)
+            for i in range(len(self.error)):
+                contenido += (" <tbody>"
+                              "<td>" + str(self.error[i][0]) + "</td>"
+                                                               "<td>" + str(self.error[i][1]) + "</td>"
+
+                                                                                                "</tbody>")
+            htmFile.write(contenido)
+            htmFile.write("""
+                     </table>
+                </div>
+                    </body>
+                    </html>""")
+            htmFile.close()
